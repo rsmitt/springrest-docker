@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres
+    volumes:
+      - /Users/roman/Downloads/docker/data
+    environment:
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - 8089:5432
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - 2181:2181
+  kafka:
+    image: wurstmeister/kafka
+    container_name: broker
+    hostname: broker
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: broker
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092
+      KAFKA_CREATE_TOPICS: "car-topic:1:1"
+    depends_on:
+      - zookeeper
+  car-service:
+    image: car_service_image
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
+      PRODUCER_BOOTSTRAP_SERVERS: broker:9092
+      CONSUMER_BOOTSTRAP_SERVERS: broker:9092
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+      - kafka
+      - zookeeper

@@ -1,0 +1,21 @@
+app:
+  kafka:
+    brokers: localhost:9092
+
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: ${app.kafka.brokers}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      bootstrap-servers: ${app.kafka.brokers}
